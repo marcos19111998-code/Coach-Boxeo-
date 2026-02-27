@@ -194,31 +194,7 @@ button:hover {
 </div>
 </div>
 
-
-
-
-<script type="module">
-
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB39D8nomd9YbuWHkpNEwq6VqbqR24rb8E",
-  authDomain: "coach-boxeo.firebaseapp.com",
-  projectId: "coach-boxeo",
-  storageBucket: "coach-boxeo.firebasestorage.app",
-  messagingSenderId: "896950461334",
-  appId: "1:896950461334:web:db2d30768bf3dd6f2d33b7",
-  measurementId: "G-1LVC0YLHPQ"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-console.log("🔥 Firestore listo");
-
-
+<script>
 const palabras=["izquierda","derecha","esquive","gancho","cross","atrás","adelante"];
 
 let training=false, paused=false;
@@ -416,36 +392,20 @@ function calculateIntensity(rounds, minutes, mode){
     );
 }
 
-async function saveRanking(rounds, minutes){
-
+function saveRanking(rounds,minutes){
     let history = JSON.parse(localStorage.getItem("boxingHistory")) || [];
+
     const points = calculateIntensity(rounds, minutes, mode);
 
-    const entry = {
+    history.push({
         date: new Date().toLocaleDateString(),
         rounds,
         minutes,
         mode,
-        points,
-        createdAt: new Date()
-    };
+        points
+    });
 
-    // 🔥 Guardar en local (como ya hacías)
-    history.push(entry);
     localStorage.setItem("boxingHistory", JSON.stringify(history));
-
-    // 🔥 Guardar en Firestore
-    try {
-        await addDoc(
-            collection(db, "ranking"),
-            entry
-        );
-        );
-        console.log("✅ Guardado en Firestore");
-    } catch (error) {
-        console.error("❌ Error Firestore:", error);
-    }
-
     loadRanking();
 }
 
@@ -592,5 +552,6 @@ loadRanking();
 
 </body>
 </html>
+
 
 

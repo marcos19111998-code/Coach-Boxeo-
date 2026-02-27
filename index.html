@@ -196,33 +196,28 @@ button:hover {
 
 
 
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB39D8nomd9YbuWHkpNEwq6VqbqR24rb8E",
-    authDomain: "coach-boxeo.firebaseapp.com",
-    projectId: "coach-boxeo",
-    storageBucket: "coach-boxeo.firebasestorage.app",
-    messagingSenderId: "896950461334",
-    appId: "1:896950461334:web:db2d30768bf3dd6f2d33b7",
-    measurementId: "G-1LVC0YLHPQ"
-  };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-  // 🔥 Hacemos global la base
-  window.db = db;
-  window.collection = collection;
-  window.addDoc = addDoc;
-  window.getDocs = getDocs;
+const firebaseConfig = {
+  apiKey: "AIzaSyB39D8nomd9YbuWHkpNEwq6VqbqR24rb8E",
+  authDomain: "coach-boxeo.firebaseapp.com",
+  projectId: "coach-boxeo",
+  storageBucket: "coach-boxeo.firebasestorage.app",
+  messagingSenderId: "896950461334",
+  appId: "1:896950461334:web:db2d30768bf3dd6f2d33b7",
+  measurementId: "G-1LVC0YLHPQ"
+};
 
-  console.log("🔥 Firestore conectado");
-</script>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-<script>
+console.log("🔥 Firestore listo");
+
 
 const palabras=["izquierda","derecha","esquive","gancho","cross","atrás","adelante"];
 
@@ -666,4 +661,3 @@ loadRanking();
 </body>
 
 </html>
-

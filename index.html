@@ -436,9 +436,10 @@ async function saveRanking(rounds, minutes){
 
     // 🔥 Guardar en Firestore
     try {
-        await window.addDoc(
-            window.collection(window.db, "ranking"),
+        await addDoc(
+            collection(db, "ranking"),
             entry
+        );
         );
         console.log("✅ Guardado en Firestore");
     } catch (error) {
@@ -591,4 +592,5 @@ loadRanking();
 
 </body>
 </html>
+
 

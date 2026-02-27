@@ -169,10 +169,10 @@ button:hover {
 <h1>🥊 Entrenamiento</h1>
 
 <div class="card">
-<button onclick="startTraining()">COMENZAR</button>
-<button onclick="pauseTraining()">PAUSAR</button>
-<button onclick="resumeTraining()">REANUDAR</button>
-<button onclick="stopTraining()">DETENER</button>
+<button id="btnStart">COMENZAR</button>
+<button id="btnPause">PAUSAR</button>
+<button id="btnResume">REANUDAR</button>
+<button id="btnStop">DETENER</button>
 </div>
 
 <div class="card">
@@ -587,10 +587,10 @@ if(selectedMode === "all"){
     },150);
 }
 
-window.startTraining = startTraining;
-window.pauseTraining = pauseTraining;
-window.resumeTraining = resumeTraining;
-window.stopTraining = stopTraining;
+document.getElementById("btnStart").addEventListener("click", startTraining);
+document.getElementById("btnPause").addEventListener("click", pauseTraining);
+document.getElementById("btnResume").addEventListener("click", resumeTraining);
+document.getElementById("btnStop").addEventListener("click", stopTraining);
     
 loadRanking();
 </script>
@@ -598,6 +598,7 @@ loadRanking();
 </body>
 </html>
            
+
 
 
 

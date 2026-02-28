@@ -138,10 +138,22 @@ button:hover {
 <input type="number" id="rounds" value="3" min="1">
 
 <label>Duración Round (mm:ss)</label>
-<input type="text" id="roundTime" value="3:00" placeholder="ej: 3:20">
+<div style="display:flex; gap:6px; align-items:center;">
+    <input type="text" id="roundTime" value="3:00" style="flex:1;">
+    <button type="button" onclick="adjustTime('roundTime', -10)">-10s</button>
+    <button type="button" onclick="adjustTime('roundTime', -5)">-5s</button>
+    <button type="button" onclick="adjustTime('roundTime', 5)">+5s</button>
+    <button type="button" onclick="adjustTime('roundTime', 10)">+10s</button>
+</div>
 
 <label>Descanso (mm:ss)</label>
-<input type="text" id="restTime" value="1:00" placeholder="ej: 1:30">
+<div style="display:flex; gap:6px; align-items:center;">
+    <input type="text" id="restTime" value="1:00" style="flex:1;">
+    <button type="button" onclick="adjustTime('restTime', -10)">-10s</button>
+    <button type="button" onclick="adjustTime('restTime', -5)">-5s</button>
+    <button type="button" onclick="adjustTime('restTime', 5)">+5s</button>
+    <button type="button" onclick="adjustTime('restTime', 10)">+10s</button>
+</div>
 
 <label>Velocidad inicial voz</label>
 <input type="number" id="speed" value="1" step="0.1" min="1">>
@@ -386,7 +398,25 @@ function parseTimeToSeconds(timeString){
     return (minutes * 60) + seconds;
 }
 
+    
+function adjustTime(inputId, changeInSeconds){
 
+    const input = document.getElementById(inputId);
+
+    let totalSeconds = parseTimeToSeconds(input.value);
+
+    totalSeconds += changeInSeconds;
+
+    // ❌ No permitir negativo
+    totalSeconds = Math.max(0, totalSeconds);
+
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    input.value = `${minutes}:${seconds.toString().padStart(2,'0')}`;
+}
+
+    
 function formatInputTime(inputId){
     const input = document.getElementById(inputId);
     input.addEventListener("blur", ()=>{
@@ -667,6 +697,7 @@ document.addEventListener("click", (e)=>{
 
 </body>
 </html>
+
 
 
 

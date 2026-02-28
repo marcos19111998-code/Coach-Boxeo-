@@ -137,23 +137,13 @@ button:hover {
 <label>Rounds</label>
 <input type="number" id="rounds" value="3" min="1">
 
-<label>Duración Round (mm:ss)</label>
-<div style="display:flex; gap:6px; align-items:center;">
-    <input type="text" id="roundTime" value="3:00" style="flex:1;">
-    <button type="button" onclick="adjustTime('roundTime', -10)">-10s</button>
-    <button type="button" onclick="adjustTime('roundTime', -5)">-5s</button>
-    <button type="button" onclick="adjustTime('roundTime', 5)">+5s</button>
-    <button type="button" onclick="adjustTime('roundTime', 10)">+10s</button>
-</div>
+<label>Duración Round</label>
+<input type="number" id="roundTime" value="180" min="0" step="10">
+<div id="roundPreview" style="font-size:12px; opacity:0.7;"></div>
 
-<label>Descanso (mm:ss)</label>
-<div style="display:flex; gap:6px; align-items:center;">
-    <input type="text" id="restTime" value="1:00" style="flex:1;">
-    <button type="button" onclick="adjustTime('restTime', -10)">-10s</button>
-    <button type="button" onclick="adjustTime('restTime', -5)">-5s</button>
-    <button type="button" onclick="adjustTime('restTime', 5)">+5s</button>
-    <button type="button" onclick="adjustTime('restTime', 10)">+10s</button>
-</div>
+<label>Descanso</label>
+<input type="number" id="restTime" value="60" min="0" step="10">
+<div id="restPreview" style="font-size:12px; opacity:0.7;"></div>
 
 <label>Velocidad inicial voz</label>
 <input type="number" id="speed" value="1" step="0.1" min="1">>
@@ -380,6 +370,27 @@ async function runTimer(){
     }
 }
 
+
+function updatePreview(inputId, previewId){
+    const value = parseInt(document.getElementById(inputId).value) || 0;
+    const min = Math.floor(value/60);
+    const sec = value%60;
+    document.getElementById(previewId).innerText = 
+        `(${min}:${sec.toString().padStart(2,'0')})`;
+}
+
+document.getElementById("roundTime").addEventListener("input", ()=>{
+    updatePreview("roundTime","roundPreview");
+});
+
+document.getElementById("restTime").addEventListener("input", ()=>{
+    updatePreview("restTime","restPreview");
+});
+
+// Inicializar
+updatePreview("roundTime","roundPreview");
+updatePreview("restTime","restPreview");
+    
     
 function parseTimeToSeconds(timeString){
 
@@ -441,8 +452,8 @@ function startTraining(){
     mode=document.getElementById("modeSelect").value;
 
     totalRounds = Math.max(1, parseInt(document.getElementById("rounds").value) || 1);
-    baseRoundDuration = parseTimeToSeconds(document.getElementById("roundTime").value);
-    baseRestDuration = parseTimeToSeconds(document.getElementById("restTime").value);
+    baseRoundDuration = parseInt(document.getElementById("roundTime").value) || 0;
+    baseRestDuration = parseInt(document.getElementById("restTime").value) || 0;
 
     roundDuration=baseRoundDuration;
     restDuration=baseRestDuration;
@@ -697,6 +708,7 @@ document.addEventListener("click", (e)=>{
 
 </body>
 </html>
+
 
 
 

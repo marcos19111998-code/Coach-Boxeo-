@@ -132,6 +132,7 @@ button:hover {
 
 <label>Rounds</label>
 <input type="number" id="rounds" value="3" min="1">
+<div id="totalPreview" style="font-size:13px; opacity:0.7; margin-top:6px;"></div>
 
 <label>Duración Round (segundos)</label>
 <input type="number" id="roundTime" value="180" min="0" step="10">
@@ -377,11 +378,15 @@ function updatePreview(inputId, previewId){
 
 document.getElementById("roundTime").addEventListener("input", ()=>{
     updatePreview("roundTime","roundPreview");
+    updateTotalTime();
 });
 
 document.getElementById("restTime").addEventListener("input", ()=>{
     updatePreview("restTime","restPreview");
+    updateTotalTime();
 });
+
+document.getElementById("rounds").addEventListener("input", updateTotalTime);
 
 // Inicializar
 updatePreview("roundTime","roundPreview");
@@ -647,23 +652,32 @@ document.addEventListener("click", (e)=>{
     }
 });
 
+
+function updateTotalTime(){
+
+    const rounds = parseInt(document.getElementById("rounds").value) || 0;
+    const roundTime = parseInt(document.getElementById("roundTime").value) || 0;
+    const restTime = parseInt(document.getElementById("restTime").value) || 0;
+
+    if(rounds <= 0){
+        document.getElementById("totalPreview").innerText = "";
+        return;
+    }
+
+    const totalSeconds =
+        (rounds * roundTime) +
+        ((rounds - 1) * restTime);
+
+    const min = Math.floor(totalSeconds / 60);
+    const sec = totalSeconds % 60;
+
+    document.getElementById("totalPreview").innerText =
+    `⏱ Total ${min}:${sec.toString().padStart(2,'0')}`;
+}
+
+updateTotalTime(); 
+
     
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

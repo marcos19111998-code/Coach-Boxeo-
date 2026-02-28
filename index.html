@@ -152,8 +152,33 @@ button:hover {
 <label>Volumen Voz</label>
 <input type="range" id="voiceVolume" min="0" max="1" step="0.1" value="1">
 
-<label>Modo</label>
+<label style="display:flex; align-items:center; gap:6px;">
+    Modo
+    <span id="modeInfoIcon" style="
+        cursor:pointer;
+        font-size:14px;
+        background:rgba(255,255,255,0.15);
+        padding:2px 6px;
+        border-radius:50%;
+        transition:0.2s;
+    ">ℹ️</span>
+</label>
+
 <select id="modeSelect">
+
+    <div id="modeTooltip" style="
+        position:relative;
+        margin-top:8px;
+        font-size:13px;
+        opacity:0;
+        transform:translateY(-5px);
+        transition:0.25s;
+        line-height:1.4;
+        background:rgba(0,0,0,0.35);
+        padding:8px 10px;
+        border-radius:8px;
+    "></div>
+    
 <option value="normal">Normal</option>
 <option value="sparring">Sparring Impredecible Real</option>
 <option value="intensity">Intensidad</option>
@@ -548,10 +573,57 @@ if(selectedMode === "all"){
 }
 
 loadRanking();
+
+    
+const modeIcon = document.getElementById("modeInfoIcon");
+const modeTooltip = document.getElementById("modeTooltip");
+const modeSelect = document.getElementById("modeSelect");
+
+const modeDescriptions = {
+    normal: "Modo clásico: combinaciones estables y ritmo constante.",
+    sparring: "Modo impredecible: duración variable y presión aleatoria.",
+    intensity: "Modo progresivo: cada round aumenta velocidad y reduce descanso."
+};
+
+function showModeTooltip(){
+    const selected = modeSelect.value;
+    modeTooltip.innerText = modeDescriptions[selected] || "";
+    modeTooltip.style.opacity = "1";
+    modeTooltip.style.transform = "translateY(0px)";
+}
+
+function hideModeTooltip(){
+    modeTooltip.style.opacity = "0";
+    modeTooltip.style.transform = "translateY(-5px)";
+}
+
+// PC hover
+modeIcon.addEventListener("mouseenter", showModeTooltip);
+modeIcon.addEventListener("mouseleave", hideModeTooltip);
+
+// Celular tap
+modeIcon.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    if(modeTooltip.style.opacity === "1"){
+        hideModeTooltip();
+    } else {
+        showModeTooltip();
+    }
+});
+
+// Cerrar si se toca afuera
+document.addEventListener("click", (e)=>{
+    if(!modeIcon.contains(e.target)){
+        hideModeTooltip();
+    }
+});
+
+    
 </script>
 
 </body>
 </html>
+
 
 
 

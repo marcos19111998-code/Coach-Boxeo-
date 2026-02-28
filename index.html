@@ -80,31 +80,6 @@ button:hover {
     background:#cc2f2f !important;
 }
 
-.time-input{
-    position:relative;
-    display:flex;
-}
-
-.time-input input{
-    flex:1;
-    padding-right:30px;
-}
-
-.arrows{
-    position:absolute;
-    right:5px;
-    top:3px;
-    display:flex;
-    flex-direction:column;
-    font-size:10px;
-    cursor:pointer;
-    user-select:none;
-}
-
-.arrows div{
-    line-height:12px;
-}
-    
 @keyframes medalGlow {
     from { transform: scale(1); }
     to { transform: scale(1.2); }
@@ -162,23 +137,13 @@ button:hover {
 <label>Rounds</label>
 <input type="number" id="rounds" value="3" min="1">
 
-<label>Duración Round (mm:ss)</label>
-<div class="time-input">
-    <input type="text" id="roundTime" value="3:00">
-    <div class="arrows">
-        <div onclick="adjustTime('roundTime',10)">▲</div>
-        <div onclick="adjustTime('roundTime',-10)">▼</div>
-    </div>
-</div>
+<label>Duración Round</label>
+<input type="number" id="roundTime" value="180" min="0" step="10">
+<div id="roundPreview" style="font-size:12px; opacity:0.7;"></div>
 
-<label>Descanso (mm:ss)</label>
-<div class="time-input">
-    <input type="text" id="restTime" value="1:00">
-    <div class="arrows">
-        <div onclick="adjustTime('restTime',10)">▲</div>
-        <div onclick="adjustTime('restTime',-10)">▼</div>
-    </div>
-</div>
+<label>Descanso</label>
+<input type="number" id="restTime" value="60" min="0" step="10">
+<div id="restPreview" style="font-size:12px; opacity:0.7;"></div>
 
 <label>Velocidad inicial voz</label>
 <input type="number" id="speed" value="1" step="0.1" min="1">>
@@ -432,31 +397,34 @@ function parseTimeToSeconds(timeString){
     if(!timeString) return 0;
 
     if(!timeString.includes(":")){
-        return Math.max(0, parseInt(timeString) || 0);
+        const minutes = Math.max(0, parseInt(timeString) || 0);
+        return minutes * 60;
     }
 
     const parts = timeString.split(":");
-    const min = Math.max(0, parseInt(parts[0]) || 0);
-    const sec = Math.max(0, parseInt(parts[1]) || 0);
 
-    return min*60 + sec;
+    const minutes = Math.max(0, parseInt(parts[0]) || 0);
+    const seconds = Math.max(0, parseInt(parts[1]) || 0);
+
+    return (minutes * 60) + seconds;
 }
 
     
-function adjustTime(inputId, change){
+function adjustTime(inputId, changeInSeconds){
 
     const input = document.getElementById(inputId);
 
-    let total = parseTimeToSeconds(input.value);
+    let totalSeconds = parseTimeToSeconds(input.value);
 
-    total += change;
+    totalSeconds += changeInSeconds;
 
-    if(total < 0) total = 0;
+    // ❌ No permitir negativo
+    totalSeconds = Math.max(0, totalSeconds);
 
-    const min = Math.floor(total/60);
-    const sec = total % 60;
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
 
-    input.value = `${min}:${sec.toString().padStart(2,'0')}`;
+    input.value = `${minutes}:${seconds.toString().padStart(2,'0')}`;
 }
 
     
@@ -740,6 +708,10 @@ document.addEventListener("click", (e)=>{
 
 </body>
 </html>
+
+
+
+
 
 
 

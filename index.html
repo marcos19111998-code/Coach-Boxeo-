@@ -143,8 +143,8 @@ button:hover {
 <div id="restPreview" style="font-size:12px; opacity:0.7;"></div>
 
 <label>Velocidad inicial voz</label>
-<input type="number" id="speed" value="1" step="0.1" min="1">
-
+<input type="number" id="speed" value="1" step="0.1" min="0.7">
+    
 <label>Volumen Campana</label>
 <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.4">
 
@@ -218,7 +218,17 @@ button:hover {
 </div>
 
 <script>
-const palabras=["izquierda","derecha","esquive","gancho","cross","atrás","adelante"];
+const palabras = [
+    "1",          // jab
+    "2",          // recto de derecha
+    "cross",
+    "gancho",
+    "esquive",
+    "izquierda",  // paso lateral
+    "derecha",    // paso lateral
+    "atrás",
+    "adelante"
+];
 
 let training=false, paused=false;
 let currentRound=1, totalRounds=0;
@@ -229,7 +239,10 @@ let isRoundPhase=true;
 let totalSecondsTrained=0;
 let selectedVoice=null;
 let mode="normal";
-
+let ritmoAltoActivo = false;
+let ritmoAltoHasta = 0;
+let ultimoComboTime = 0;
+    
 /* 🔊 CAMPANA LOCAL */
 const bell=new Audio();
 bell.src="Sonidos/campana.mp3";
@@ -270,7 +283,8 @@ document.getElementById("voiceSelect").addEventListener("change",()=>{
 });
 
 function speak(text,rate){
-    if(!training || paused) return;
+    if(!training || paused || !isRoundPhase) return;
+    
     const u=new SpeechSynthesisUtterance(text);
     u.voice=selectedVoice;
     u.rate=rate;
@@ -284,11 +298,23 @@ function formatTime(sec){
 }
 
 function randomCombo(){
-    let length=Math.floor(Math.random()*3)+1;
-    let combo=[];
+    let length = Math.floor(Math.random()*3)+1;
+    let combo = [];
+    let lastWord = null;
+
     for(let i=0;i<length;i++){
-        combo.push(palabras[Math.floor(Math.random()*palabras.length)]);
+        let word;
+
+        do{
+            word = palabras[Math.floor(Math.random()*palabras.length)];
+        } 
+        while(word === "cross" && lastWord === "cross"); 
+        // ❌ solo evita cross cross
+
+        combo.push(word);
+        lastWord = word;
     }
+
     return combo.join(" ");
 }
 
@@ -300,6 +326,12 @@ async function runTimer(){
     let baseRate = Math.max(1, parseFloat(document.getElementById("speed").value) || 1);
     let rate=baseRate;
 
+    // controlar fin de ritmo alto
+    if(ritmoAltoActivo && Date.now() > ritmoAltoHasta){
+        ritmoAltoActivo = false;
+        speak("Volvemos al ritmo normal", 1);
+    }
+    
     if(mode==="intensity"){
         rate+=currentRound*0.1;
         restDuration=Math.max(10,baseRestDuration-currentRound*5);
@@ -318,15 +350,27 @@ async function runTimer(){
 
         if(isRoundPhase){
 
-            let speakFrequency=2;
-            if(mode==="intensity") speakFrequency=1;
+            let intervalo = 3000; // 3 segundos
 
-            if(remainingSeconds%speakFrequency===0){
-                speak(randomCombo(),rate);
+            if(mode==="intensity") intervalo = 2000;
+            if(mode==="sparring") intervalo = 3000;
+            
+            if(ritmoAltoActivo){
+                intervalo = 1200; // ritmo alto real
+            }
+            
+            if(Date.now() - ultimoComboTime > intervalo){
+                speak(randomCombo(), rate);
+                ultimoComboTime = Date.now();
             }
 
-            if(mode==="sparring" && Math.random()<0.12){
-                speak("Ritmo alto!",rate+0.2);
+            if(mode==="sparring" && Math.random()<0.12 && !ritmoAltoActivo){
+                
+                let duracion = Math.random() < 0.5 ? 10 : 15; // 10 o 15 segundos
+                speak(`${duracion} segundos de ritmo alto!`, rate+0.2);
+                
+                ritmoAltoActivo = true;
+                ritmoAltoHasta = Date.now() + (duracion * 1000);
             }
         }
 
@@ -681,3 +725,4 @@ updateTotalTime();
 </script>
 </body>
 </html>
+

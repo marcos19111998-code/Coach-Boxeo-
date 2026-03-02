@@ -253,6 +253,7 @@ let ritmoAltoActivo = false;
 let ritmoAltoHasta = 0;
 let ultimoComboTime = 0;
 let ritmoAltoCooldownHasta = 0;
+let ultimoChequeoRitmoAlto = 0;
     
 /* 🔊 CAMPANA LOCAL */
 const bell=new Audio();
@@ -294,10 +295,11 @@ document.getElementById("voiceSelect").addEventListener("change",()=>{
 });
 
 function speak(text, rate){
+
     if(!training || paused || !isRoundPhase) return;
 
-    // Si ya está hablando, no interrumpas combinaciones normales
     if(speechSynthesis.speaking){
+        setTimeout(()=> speak(text, rate), 200);
         return;
     }
 
@@ -364,11 +366,18 @@ async function runTimer(){
 
             /* 🔥 TERMINAR RITMO ALTO */
             if(ritmoAltoActivo && Date.now() > ritmoAltoHasta){
-            ritmoAltoActivo = false;
-            ritmoAltoCooldownHasta = Date.now() + randomBetween(8000,15000);
-            speak("Volvemos al ritmo normal", baseRate);
-            document.getElementById("ritmoAltoIndicator").style.display = "none";
-            document.getElementById("timer").style.color = "white";
+            
+                ritmoAltoActivo = false;
+                ritmoAltoHasta = 0; // ← agregá esto
+            
+                ritmoAltoCooldownHasta = Date.now() + randomBetween(8000,15000);
+            
+                setTimeout(()=>{
+                    speak("Volvemos al ritmo normal", baseRate);
+                }, 800);
+            
+                document.getElementById("ritmoAltoIndicator").style.display = "none";
+                document.getElementById("timer").style.color = "white";
             }
 
             let intervalo = 3000;
@@ -390,20 +399,22 @@ async function runTimer(){
             }
 
             /* 🎯 ACTIVAR RITMO ALTO */
-            if(mode==="sparring" &&
-               Math.random() < 0.08 &&
+/* 🎯 ACTIVAR RITMO ALTO */
+            if(
+               mode==="sparring" &&
+               Math.random() < 0.03 &&
                !ritmoAltoActivo &&
                remainingSeconds > 15 &&
-               Date.now() > ritmoAltoCooldownHasta
-            )
-
+               Date.now() > ritmoAltoCooldownHasta &&
+               !speechSynthesis.speaking
+            ){
                 let duracion = Math.random() < 0.5 ? 10 : 15;
-
+            
                 speak(`${duracion} segundos de ritmo alto`, rate + 0.3);
-
+            
                 ritmoAltoActivo = true;
                 ritmoAltoHasta = Date.now() + (duracion * 1000);
-
+            
                 document.getElementById("ritmoAltoIndicator").style.display = "block";
             }
         }
@@ -766,8 +777,3 @@ updateTotalTime();
 </script>
 </body>
 </html>
-
-
-
-
-

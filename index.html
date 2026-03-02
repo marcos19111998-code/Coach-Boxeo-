@@ -252,6 +252,7 @@ let mode="normal";
 let ritmoAltoActivo = false;
 let ritmoAltoHasta = 0;
 let ultimoComboTime = 0;
+let ritmoAltoCooldownHasta = 0;
     
 /* 🔊 CAMPANA LOCAL */
 const bell=new Audio();
@@ -295,8 +296,9 @@ document.getElementById("voiceSelect").addEventListener("change",()=>{
 function speak(text, rate){
     if(!training || paused || !isRoundPhase) return;
 
+    // Si ya está hablando, no interrumpas combinaciones normales
     if(speechSynthesis.speaking){
-        speechSynthesis.cancel();
+        return;
     }
 
     const u = new SpeechSynthesisUtterance(text);
@@ -362,10 +364,11 @@ async function runTimer(){
 
             /* 🔥 TERMINAR RITMO ALTO */
             if(ritmoAltoActivo && Date.now() > ritmoAltoHasta){
-                ritmoAltoActivo = false;
-                speak("Volvemos al ritmo normal", baseRate);
-                document.getElementById("ritmoAltoIndicator").style.display = "none";
-                document.getElementById("timer").style.color = "white";
+            ritmoAltoActivo = false;
+            ritmoAltoCooldownHasta = Date.now() + randomBetween(8000,15000);
+            speak("Volvemos al ritmo normal", baseRate);
+            document.getElementById("ritmoAltoIndicator").style.display = "none";
+            document.getElementById("timer").style.color = "white";
             }
 
             let intervalo = 3000;
@@ -387,12 +390,12 @@ async function runTimer(){
             }
 
             /* 🎯 ACTIVAR RITMO ALTO */
-            if(
-                   mode==="sparring" &&
-                   Math.random() < 0.08 &&
-                   !ritmoAltoActivo &&
-                   remainingSeconds > 15
-                ){
+            if(mode==="sparring" &&
+               Math.random() < 0.08 &&
+               !ritmoAltoActivo &&
+               remainingSeconds > 15 &&
+               Date.now() > ritmoAltoCooldownHasta
+            )
 
                 let duracion = Math.random() < 0.5 ? 10 : 15;
 
@@ -763,6 +766,7 @@ updateTotalTime();
 </script>
 </body>
 </html>
+
 
 
 

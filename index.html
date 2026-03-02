@@ -292,14 +292,19 @@ document.getElementById("voiceSelect").addEventListener("change",()=>{
     selectedVoice=voices.find(v=>v.name===document.getElementById("voiceSelect").value);
 });
 
-function speak(text,rate){
+function speak(text, rate){
     if(!training || paused || !isRoundPhase) return;
-    
-    const u=new SpeechSynthesisUtterance(text);
-    u.voice=selectedVoice;
-    u.rate=rate;
-    u.pitch=0.9;
-    u.volume=parseFloat(document.getElementById("voiceVolume").value);
+
+    if(speechSynthesis.speaking){
+        speechSynthesis.cancel();
+    }
+
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = selectedVoice;
+    u.rate = rate;
+    u.pitch = 0.9;
+    u.volume = parseFloat(document.getElementById("voiceVolume").value);
+
     speechSynthesis.speak(u);
 }
 
@@ -758,6 +763,7 @@ updateTotalTime();
 </script>
 </body>
 </html>
+
 
 
 

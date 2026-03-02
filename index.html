@@ -91,6 +91,15 @@ button:hover {
     100% { transform: scale(1); }
 }
 
+#ritmoAltoIndicator {
+    animation: pulseRed 0.6s infinite alternate;
+}
+
+@keyframes pulseRed {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+}
+
 /* 🔔 CAMPANA */
 .bell-animation {
     position: fixed !important;
@@ -199,6 +208,7 @@ button:hover {
 </div>
 
 <div class="card">
+<div id="ritmoAltoIndicator" style="display:none; font-size:22px; color:#ff4d4d; text-align:center; font-weight:bold;"></div>
 <div class="timer" id="timer">00:00</div>
 <div class="status" id="status">Esperando...</div>
 </div>
@@ -323,54 +333,70 @@ function randomBetween(min,max){
 }
 
 async function runTimer(){
-    let baseRate = Math.max(1, parseFloat(document.getElementById("speed").value) || 1);
-    let rate=baseRate;
 
-    // controlar fin de ritmo alto
-    if(ritmoAltoActivo && Date.now() > ritmoAltoHasta){
-        ritmoAltoActivo = false;
-        speak("Volvemos al ritmo normal", 1);
-    }
-    
+    let baseRate = Math.max(0.7, parseFloat(document.getElementById("speed").value) || 1);
+    let rate = baseRate;
+
     if(mode==="intensity"){
-        rate+=currentRound*0.1;
-        restDuration=Math.max(10,baseRestDuration-currentRound*5);
+        rate += currentRound * 0.1;
+        restDuration = Math.max(10, baseRestDuration - currentRound * 5);
     }
 
     playBell();
 
-    while(training && remainingSeconds>0){
+    while(training && remainingSeconds > 0){
 
         if(paused){
             await new Promise(r=>setTimeout(r,200));
             continue;
         }
 
-        document.getElementById("timer").innerText=formatTime(remainingSeconds);
+        document.getElementById("timer").innerText = formatTime(remainingSeconds);
 
         if(isRoundPhase){
 
-            let intervalo = 3000; // 3 segundos
+            /* 🔥 TERMINAR RITMO ALTO */
+            if(ritmoAltoActivo && Date.now() > ritmoAltoHasta){
+                ritmoAltoActivo = false;
+                speak("Volvemos al ritmo normal", baseRate);
+                document.getElementById("ritmoAltoIndicator").style.display = "none";
+                document.getElementById("timer").style.color = "white";
+            }
+
+            let intervalo = 3000;
 
             if(mode==="intensity") intervalo = 2000;
-            if(mode==="sparring") intervalo = 3000;
-            
+
             if(ritmoAltoActivo){
-                intervalo = 1200; // ritmo alto real
+                intervalo = 1000; // combos más rápidos
+                const seg = Math.ceil((ritmoAltoHasta - Date.now())/1000);
+                document.getElementById("ritmoAltoIndicator").innerText =
+                    `🔥 RITMO ALTO ${seg}s`;
+                document.getElementById("timer").style.color = "#ff4d4d";
+                
             }
-            
+
             if(Date.now() - ultimoComboTime > intervalo){
-                speak(randomCombo(), rate);
+                speak(randomCombo(), rate + 0.2);
                 ultimoComboTime = Date.now();
             }
 
-            if(mode==="sparring" && Math.random()<0.12 && !ritmoAltoActivo){
-                
-                let duracion = Math.random() < 0.5 ? 10 : 15; // 10 o 15 segundos
-                speak(`${duracion} segundos de ritmo alto!`, rate+0.2);
-                
+            /* 🎯 ACTIVAR RITMO ALTO */
+            if(
+                   mode==="sparring" &&
+                   Math.random() < 0.08 &&
+                   !ritmoAltoActivo &&
+                   remainingSeconds > 15
+                ){
+
+                let duracion = Math.random() < 0.5 ? 10 : 15;
+
+                speak(`${duracion} segundos de ritmo alto`, rate + 0.3);
+
                 ritmoAltoActivo = true;
                 ritmoAltoHasta = Date.now() + (duracion * 1000);
+
+                document.getElementById("ritmoAltoIndicator").style.display = "block";
             }
         }
 
@@ -382,35 +408,37 @@ async function runTimer(){
         playBell();
 
         if(isRoundPhase){
-            totalSecondsTrained+=roundDuration;
+            totalSecondsTrained += roundDuration;
 
-            if(currentRound<totalRounds){
-                isRoundPhase=false;
-                remainingSeconds=restDuration;
+            if(currentRound < totalRounds){
+                isRoundPhase = false;
+                remainingSeconds = restDuration;
                 document.getElementById("status").innerText="DESCANSO";
                 await runTimer();
-            }else{
+            } else {
                 training=false;
                 document.getElementById("status").innerText="Finalizado";
                 saveRanking(totalRounds,Math.floor(totalSecondsTrained/60));
             }
-        }else{
+        } else {
             isRoundPhase=true;
             currentRound++;
 
             if(mode==="sparring"){
-                roundDuration=randomBetween(baseRoundDuration-15,baseRoundDuration+15);
+                roundDuration = randomBetween(
+                    baseRoundDuration-15,
+                    baseRoundDuration+15
+                );
             } else {
-                roundDuration=baseRoundDuration;
+                roundDuration = baseRoundDuration;
             }
 
-            remainingSeconds=roundDuration;
+            remainingSeconds = roundDuration;
             document.getElementById("status").innerText="ROUND "+currentRound;
             await runTimer();
         }
     }
 }
-
 
 function updatePreview(inputId, previewId){
     const value = parseInt(document.getElementById(inputId).value) || 0;
@@ -454,7 +482,12 @@ function startTraining(){
     isRoundPhase=true;
     remainingSeconds=roundDuration;
     totalSecondsTrained=0;
-
+    
+    ritmoAltoActivo = false;
+    ritmoAltoHasta = 0;
+    ultimoComboTime = 0;
+    document.getElementById("ritmoAltoIndicator").style.display = "none";
+    
     document.getElementById("status").innerText="ROUND 1";
     runTimer();
 }
@@ -725,5 +758,6 @@ updateTotalTime();
 </script>
 </body>
 </html>
+
 
 
